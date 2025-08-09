@@ -1,42 +1,17 @@
-# keycloak-demo
+# Так как docker-compose файл находится в keycloak нужно в нее перейти
 
-## my-java-app Project setup
-
+## Запустить
 ```
-./gradlew bootRun
-```
-
-## my-vue-app Project setup
-
-Start up Vue application using the Vue CLI development server
-```
-yarn install
+cd keycloak
 ```
 
-## Project startup
+## Собрать
+
 ```
-yarn serve --port 8081
+docker compose build
 ```
 
-### Start Keycloak
-Here we are using Docker to startup and configure Keycloak
-
-#### Clean up all Docker containers
-```
-docker-compose down --volumes
-```
-
-#### Build and run the Docker container
+## Запустить
 ```
 docker-compose up
 ```
-
-You can refer this blog post on [SPA Security with PKCE](https://medium.com/@vindya.gunawardena/spa-security-with-pkce-fb55af7d3f5) for more details.
-
-
-
-#### Credentials
-- Keycloak Admin Console UserName - `admin`
-- Vue App UserName - `vindya`
-
-_You can refer `.env` for passwords_
