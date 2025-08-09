@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  keycloak_db:
+    image: postgres:14
+    environment:
+      POSTGRES_DB: keycloak_db
+      POSTGRES_USER: keycloak_user
+      POSTGRES_PASSWORD: keycloak_password
+    volumes:
+      - ./postgres-keycloak-data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+  keycloak:
+    image: quay.io/keycloak/keycloak:21.1
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak_db:5432/keycloak_db
+      KC_DB_USERNAME: keycloak_user
+      KC_DB_PASSWORD: keycloak_password
+    command:
+      - start-dev
+      - --import-realm
+    volumes:
+      - ./realm-export.json:/opt/keycloak/data/import/realm-export.json
+    ports:
+      - "8080:8080"
+    depends_on:
+      - keycloak_db
+
+  backend:
+    build:
+      context: ../my-java-app
+      dockerfile: Dockerfile
+    environment:
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8080/realms/reports-realm
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/reports-realm/protocol/openid-connect/certs
+    ports:
+      - "9090:9090"
+    depends_on:
+      - keycloak
+
+  frontend:
+    build:
+      context: ../my-vue-app
+      dockerfile: Dockerfile
+    working_dir: /app
+    command: sh -c "yarn install && yarn serve --port 8081 --host 0.0.0.0"
+    ports:
+      - "8081:8081"
+    depends_on:
+      - backend
+
+volumes:
+  keycloak-db-data:
